@@ -9,8 +9,8 @@ export class AccountService {
        
     }
 
-    create(data: User): Promisse<User> {
+    async create(data: User): Promise<User> {
         const user = new this.model(data);
-        return user.save();
+        return await user.save();
     }
 }
