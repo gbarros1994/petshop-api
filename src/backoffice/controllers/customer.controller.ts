@@ -1,6 +1,9 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, UseInterceptors } from "@nestjs/common";
+import { Address } from "cluster";
+import { model } from "mongoose";
 import { ValidatorInterceptor } from "src/interceptors/validator.interceptor";
-import { CreateCustomerContract } from "../contracts/customer.contracts";
+import { CreateAddressContract } from "../contracts/customer/create-address.contract";
+import { CreateCustomerContract } from "../contracts/customer/create-customer.contracts";
 import { CreateCustomerDto } from "../dtos/create-customer-dto";
 import { Customer } from "../models/customer.model";
 import { Result } from "../models/result.model";
@@ -46,6 +49,28 @@ export class CustomerController {
             throw new HttpException(new Result('Não foi possível realizar o cadastro', false, null, error), HttpStatus.BAD_REQUEST);  
         }
         
+    }
+
+    @Post(':document/addresses/billing')
+    @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
+    async addBillindAddress(@Param('document') document, @Body() model: Address) {
+        try {
+            const res = await this.customerService.addShippingAddress(document, model);
+            return res;
+        } catch (error) {
+            throw new HttpException(new Result('Não foi possível realizar o cadastro', false, null, error), HttpStatus.BAD_REQUEST);  
+        }
+    }
+
+    @Post(':document/addresses/shipping')
+    @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
+    async addShippingAddress(@Param('document') document, @Body() model: Address) {
+        try {
+            await this.customerService.addBillindAddress(document, model);
+            return model;
+        } catch (error) {
+            throw new HttpException(new Result('Não foi possível realizar o cadastro', false, null, error), HttpStatus.BAD_REQUEST);  
+        }
     }
 
     @Put(':document')
